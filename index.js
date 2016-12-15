@@ -9,10 +9,11 @@ import {
     AppRegistry,
     StyleSheet,
     Text,
-    View
+    View,
+    Navigator
 } from 'react-native';
 
-import {Button, TabBar} from 'antd-mobile';
+import {TabBar} from 'antd-mobile';
 
 import List from './src/view/List';
 import Edit from './src/view/Edit';
@@ -42,7 +43,19 @@ export default class Leibown extends Component {
                             });
                         }}
                     >
-                        <List/>
+                        <Navigator
+                            initialRoute={{
+                                name: 'list',
+                                component: List
+                            }}
+                            configureScene={(route) => {
+                                return Navigator.SceneConfigs.FloatFromRight;
+                            }}
+                            renderScene={(route, navigator) => {
+                                let Component = route.component;
+                                return <Component {...route.params} navigator={navigator}/>
+                            }}
+                        />
                     </TabBar.Item>
                     <TabBar.Item
                         title="编辑"
@@ -63,6 +76,7 @@ export default class Leibown extends Component {
                         icon={require('./src/img/home_nav_btn_me_unselected.png')}
                         selectedIcon={require('./src/img/home_nav_btn_me_selected.png')}
                         selected={this.state.selectedTab === 'User'}
+                        badge={99}
                         onPress={() => {
                             this.setState({
                                 selectedTab: 'User',

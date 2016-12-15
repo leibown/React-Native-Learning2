@@ -10,11 +10,16 @@ import {
     ListView,
     Dimensions,
     Image,
-    ActivityIndicator
+    RefreshControl
 } from 'react-native';
+
+import {ActivityIndicator} from 'antd-mobile';
 
 import request from '../common/request';
 import config from '../common/config';
+import Item from './Item';
+import Detail from './Detail';
+
 
 const width = Dimensions.get('window').width;
 
@@ -32,6 +37,7 @@ export default class List extends Component {
         this.state = {
             dataSource: ds.cloneWithRows([]),
             isLoadingTail: false,
+            isRefreshing: false
         }
     }
 
@@ -42,45 +48,56 @@ export default class List extends Component {
     }
 
     _renderRow = (row) => {
-        return (
-            <View style={styles.item}>
-                <Text style={styles.itemText}>{row.title}</Text>
-                <Image source={{uri: row.thumb}} style={styles.itemImage}>
-                    <Image source={require('../img/play.png')} style={styles.play}/>
-                </Image>
-                <View style={styles.itemFooter}>
-                    <View style={styles.handleText}>
-                        <Image source={require('../img/like.png')} style={styles.moreImg}/>
-                        <Text style={styles.moreText}>点赞</Text>
-                    </View>
-                    <View style={styles.handleText}>
-                        <Image source={require('../img/comment.png')} style={styles.moreImg}/>
-                        <Text style={styles.moreText}>评论</Text>
-                    </View>
-                </View>
-            </View>);
+        return (<Item row={row} onSelect={() => this._loadPage(row)}/>);
+    };
+
+    _loadPage = (row) => {
+        this.props.navigator.push({
+            name: 'detail',
+            component: Detail,
+            params: {
+                data: row
+            }
+        });
     };
 
     _fetchData = (page) => {
         let that = this;
-        this.setState({
-            isLoadingTail: true
-        });
+        if (page > 1) {
+            this.setState({
+                isLoadingTail: true
+            });
+        } else {
+            this.setState({
+                isRefreshing: true
+            });
+        }
         request.get(config.api.base + config.api.list, {
             accessToken: '123123',
             page: page
         }).then((data) => {
             if (data.success) {
+                if (page == 1) {
+                    cachedResult.items = [];
+                }
+
                 let items = cachedResult.items.slice();
                 items = items.concat(data.data);
                 cachedResult.items = items;
                 cachedResult.total = data.total;
 
                 setTimeout(() => {
-                    that.setState({
-                        dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
-                        isLoadingTail: false
-                    });
+                    if (page > 1) {
+                        that.setState({
+                            dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
+                            isLoadingTail: false
+                        });
+                    } else {
+                        this.setState({
+                            dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
+                            isRefreshing: false
+                        });
+                    }
                 }, 2000);
             }
         })
@@ -100,6 +117,7 @@ export default class List extends Component {
         if (!this._hasMore() || this.state.isLoadingTail) {
             return;
         }
+        cachedResult.nextPage = cachedResult.nextPage += 1;
         let page = cachedResult.nextPage;
         this._fetchData(page);
     };
@@ -119,13 +137,18 @@ export default class List extends Component {
         }
 
         return (
-            <ActivityIndicator
-                style={styles.loadingMore}
-                animating={true}
-                size={30}/>
+            <View style={styles.loadingMore}>
+                <ActivityIndicator
+                    animating={true}
+                    size={30}
+                    text="正在加载中"/>
+            </View>
         );
     };
 
+    _onRefresh = () => {
+        this._fetchData(1);
+    };
 
     render() {
         return (
@@ -137,14 +160,21 @@ export default class List extends Component {
                     dataSource={this.state.dataSource}
                     renderRow={this._renderRow}
                     enableEmptySections={true}
-                    onEndReachedThreshold={20}
+                    onEndReachedThreshold={30}
                     onEndReached={this._fetchMoreData}
                     renderFooter={this._renderFooter}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.isRefreshing}
+                            onRefresh={this._onRefresh}
+                            colors={['black']}
+                            progressBackgroundColor="white"
+                        />
+                    }
                 />
             </View>
         );
     }
-
 }
 
 const styles = StyleSheet.create({
@@ -159,44 +189,10 @@ const styles = StyleSheet.create({
             justifyContent: 'center',
             alignItems: 'center',
         },
-        item: {},
-        itemImage: {
-            width: width,
-            height: width * 0.65
-        },
-        itemText: {
-            padding: 10,
-            fontSize: 15,
-        },
-        play: {
-            position: 'absolute',
-            bottom: 10,
-            right: 10,
-            width: 40,
-            height: 40,
-        },
-        itemFooter: {
-            flexDirection: 'row',
-            width: width,
-            justifyContent: 'space-between',
-        },
-        handleText: {
-            flexDirection: 'row',
-            justifyContent: 'center',
-            width: width / 2 - 0.5,
-            backgroundColor: 'white'
-        },
-        moreImg: {
-            width: 25,
-            height: 25,
-            margin: 10
-        },
-        moreText: {
-            alignSelf: 'center',
-            fontSize: 18,
-        },
         loadingMore: {
-            marginVertical: 20,
+            height: 60,
+            alignItems: 'center',
+            justifyContent: 'center'
         },
         loadingText: {
             color: '#777',
