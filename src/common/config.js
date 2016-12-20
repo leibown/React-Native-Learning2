@@ -15,5 +15,6 @@ module.exports = {
         base: 'http://rap.taobao.org/mockjs/11392/',
         list: 'api/creations',
         up: 'api/up',
+        comment: 'api/comment',
     }
 };

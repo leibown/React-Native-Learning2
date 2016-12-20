@@ -33,7 +33,7 @@ export default class List extends Component {
 
     constructor(props) {
         super(props);
-        var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+        let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         this.state = {
             dataSource: ds.cloneWithRows([]),
             isLoadingTail: false,
@@ -86,19 +86,17 @@ export default class List extends Component {
                 cachedResult.items = items;
                 cachedResult.total = data.total;
 
-                setTimeout(() => {
-                    if (page > 1) {
-                        that.setState({
-                            dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
-                            isLoadingTail: false
-                        });
-                    } else {
-                        this.setState({
-                            dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
-                            isRefreshing: false
-                        });
-                    }
-                }, 2000);
+                if (page > 1) {
+                    that.setState({
+                        dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
+                        isLoadingTail: false
+                    });
+                } else {
+                    this.setState({
+                        dataSource: that.state.dataSource.cloneWithRows(cachedResult.items),
+                        isRefreshing: false
+                    });
+                }
             }
         })
             .catch((error) => {
