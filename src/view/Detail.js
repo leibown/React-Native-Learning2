@@ -15,7 +15,9 @@ import {
     Modal,
 } from 'react-native';
 
+import Button from 'react-native-button';
 import Video from 'react-native-video';
+
 const width = Dimensions.get('window').width;
 
 import request from '../common/request';
@@ -53,6 +55,7 @@ export default class Detail extends Component {
 
             //modal
             modalVisible: false,
+            commentContent: '',
         }
     }
 
@@ -174,6 +177,31 @@ export default class Detail extends Component {
         this._setModalVisible(false);
     };
 
+    //提交评论
+    _commitComment = () => {
+        console.log('提交评论:' + this.state.commentContent);
+        if (this.state.commentContent) {
+            request
+                .get(config.api.base + config.api.commit, {
+                    accessToken: '123123',
+                    _id: this.props.data._id,
+                    content: '123asd',
+                })
+                .then((data) => {
+                    console.log('正确');
+                    console.log(data);
+                    if (data.success) {
+                        this._closeModal();
+                    }
+                })
+                .catch((e) => {
+                    console.log('错误：');
+                    console.log(e);
+                });
+        }
+    };
+
+
     render() {
         let data = this.props.data;
         return (
@@ -291,8 +319,13 @@ export default class Detail extends Component {
                             style={styles.content}
                             multiline={true}
                             underlineColorAndroid='transparent'
+                            onChangeText={(text) => {
+                                this.setState({
+                                    commentContent: text,
+                                });
+                            }}
                         />
-                        <Button />
+                        <Button style={styles.commitBtn} onPress={this._commitComment}>提交</Button>
                     </View>
                 </Modal>
             </View>
@@ -343,152 +376,187 @@ export default class Detail extends Component {
 const videoHeight = width * 0.56;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F5FCFF',
-    },
-    modalContainer: {
-        flex: 1,
-    },
-    modalClose: {
-        alignSelf: 'center',
-        width: 50,
-        height: 50,
-    },
-    header: {
-        flexDirection: 'row',
-        width: width,
-        height: 50,
-        backgroundColor: "white",
-        borderBottomWidth: 1,
-        borderColor: 'rgba(0,0,0,0.1)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    backBox: {
-        position: 'absolute',
-        flexDirection: 'row',
-        width: 100,
-        left: 0,
-        alignItems: 'center',
-        marginTop: 13,
-    },
-    backImg: {
-        height: 24,
-        width: 30,
-    },
-    videoBox: {
-        width: width,
-        backgroundColor: '#000',
-    },
-    backgroundVideo: {
-        width: width,
-        height: videoHeight,
-    },
-    progress: {
-        backgroundColor: 'gray',
-        width: width,
-        height: 2,
-    },
-    progressBar: {
-        backgroundColor: 'orange',
-        width: 1,
-        height: 2,
-    },
-    loading: {
-        position: 'absolute',
-        left: 0,
-        top: videoHeight / 2 - 20,
-        width: width,
-        alignSelf: 'center',
-        backgroundColor: 'transparent',
-    },
-    play: {
-        alignSelf: 'center',
-        width: 60,
-        height: 60,
-    },
-    playBox: {
-        position: 'absolute',
-        left: width / 2 - 30,
-        top: videoHeight / 2 - 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    pauseBox: {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: width,
-        height: videoHeight,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+        container: {
+            flex: 1,
+            backgroundColor: '#F5FCFF',
+        },
+        modalContainer: {
+            flex: 1,
+        },
+        modalClose: {
+            alignSelf: 'center',
+            width: 50,
+            height: 50,
+        },
+        commitBtn: {
+            width: width - 20,
+            margin: 10,
+            padding: 15,
+            backgroundColor: 'skyblue',
+            borderRadius: 10,
+            justifyContent: 'center',
+            alignSelf: 'center',
+            textAlign: 'center',
+        },
+        header: {
+            flexDirection: 'row',
+            width: width,
+            height: 50,
+            backgroundColor: "white",
+            borderBottomWidth: 1,
+            borderColor: 'rgba(0,0,0,0.1)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
+        ,
+        backBox: {
+            position: 'absolute',
+            flexDirection: 'row',
+            width: 100,
+            left: 0,
+            alignItems: 'center',
+            marginTop: 13,
+        }
+        ,
+        backImg: {
+            height: 24,
+            width: 30,
+        }
+        ,
+        videoBox: {
+            width: width,
+            backgroundColor: '#000',
+        }
+        ,
+        backgroundVideo: {
+            width: width,
+            height: videoHeight,
+        }
+        ,
+        progress: {
+            backgroundColor: 'gray',
+            width: width,
+            height: 2,
+        }
+        ,
+        progressBar: {
+            backgroundColor: 'orange',
+            width: 1,
+            height: 2,
+        }
+        ,
+        loading: {
+            position: 'absolute',
+            left: 0,
+            top: videoHeight / 2 - 20,
+            width: width,
+            alignSelf: 'center',
+            backgroundColor: 'transparent',
+        }
+        ,
+        play: {
+            alignSelf: 'center',
+            width: 60,
+            height: 60,
+        }
+        ,
+        playBox: {
+            position: 'absolute',
+            left: width / 2 - 30,
+            top: videoHeight / 2 - 30,
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
+        ,
+        pauseBox: {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: width,
+            height: videoHeight,
+            justifyContent: 'center',
+            alignItems: 'center',
+        }
+        ,
 
-    infoBox: {
-        width: width,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 10,
-    },
-    avatar: {
-        width: 60,
-        height: 60,
-        marginRight: 10,
-        marginLeft: 10,
-        borderRadius: 30,
-    },
-    descBox: {
-        flex: 1,
-    },
-    nickName: {
-        fontSize: 16,
-    },
-    title: {
-        marginTop: 8,
-        fontSize: 16,
-        color: '#666',
-    },
-    commentAvatar: {
-        width: 40,
-        height: 40,
-        marginRight: 10,
-        marginLeft: 10,
-        borderRadius: 20,
-    },
-    commentDescBox: {
-        flex: 1,
-    },
-    commentNickName: {
-        fontSize: 14,
-    },
-    commentContent: {
-        marginTop: 8,
-        fontSize: 14,
-        color: '#999',
-    },
-    loadingMore: {
-        height: 60,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    comment: {
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 8,
-    },
-    content: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 4,
-        fontSize: 14,
-        height: 80,
-        padding: 10,
-        justifyContent:'flex-start'
-    },
-    commentArea: {
-        padding: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-});
+        infoBox: {
+            width: width,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 10,
+        }
+        ,
+        avatar: {
+            width: 60,
+            height: 60,
+            marginRight: 10,
+            marginLeft: 10,
+            borderRadius: 30,
+        }
+        ,
+        descBox: {
+            flex: 1,
+        }
+        ,
+        nickName: {
+            fontSize: 16,
+        }
+        ,
+        title: {
+            marginTop: 8,
+            fontSize: 16,
+            color: '#666',
+        }
+        ,
+        commentAvatar: {
+            width: 40,
+            height: 40,
+            marginRight: 10,
+            marginLeft: 10,
+            borderRadius: 20,
+        }
+        ,
+        commentDescBox: {
+            flex: 1,
+        }
+        ,
+        commentNickName: {
+            fontSize: 14,
+        }
+        ,
+        commentContent: {
+            marginTop: 8,
+            fontSize: 14,
+            color: '#999',
+        }
+        ,
+        loadingMore: {
+            height: 60,
+            alignItems: 'center',
+            justifyContent: 'center'
+        }
+        ,
+        comment: {
+            marginTop: 10,
+            marginBottom: 10,
+            padding: 8,
+        }
+        ,
+        content: {
+            borderWidth: 1,
+            borderColor: '#ddd',
+            borderRadius: 4,
+            fontSize: 14,
+            height: 80,
+            padding: 10,
+            justifyContent: 'flex-start'
+        }
+        ,
+        commentArea: {
+            padding: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: '#eee',
+        }
+        ,
+    })
+    ;

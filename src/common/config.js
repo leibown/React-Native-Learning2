@@ -16,5 +16,6 @@ module.exports = {
         list: 'api/creations',
         up: 'api/up',
         comment: 'api/comment',
+        commit: '/api/commit',
     }
 };
