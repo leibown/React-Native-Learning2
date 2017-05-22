@@ -182,16 +182,30 @@ export default class Detail extends Component {
         console.log('提交评论:' + this.state.commentContent);
         if (this.state.commentContent) {
             request
-                .get(config.api.base + config.api.commit, {
+                .get(config.api.base + config.api.comment, {
                     accessToken: '123123',
                     _id: this.props.data._id,
-                    content: '123asd',
                 })
                 .then((data) => {
                     console.log('正确');
                     console.log(data);
                     if (data.success) {
                         this._closeModal();
+                        let userComment = {
+                            _id: 'asda12313',
+                            author: {
+                                avatar: 'http://dummyimage.com/640x640/ca5e6a)","nickname":"Steven Taylor',
+                                nickname: 'Leibown',
+                            },
+                            content: this.state.commentContent,
+                        };
+                        let items = cachedResult.items.slice();
+                        items = [userComment].concat(items);
+                        cachedResult.items = items;
+                        cachedResult.total = data.total + 1;
+                        this.setState({
+                            dataSource: this.state.dataSource.cloneWithRows(cachedResult.items),
+                        });
                     }
                 })
                 .catch((e) => {
